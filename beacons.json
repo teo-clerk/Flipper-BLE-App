@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Aula M4",
+    "uuid": "E282171413654717B14D4845BE72ECE0",
+    "major": 2,
+    "minor": 3,
+    "rssi_1m": -54
+  },
+  {
+    "name": "Living Room",
+    "uuid": "FDA50693A4E24FB1AFCFC6EB07647825",
+    "major": 10,
+    "minor": 1,
+    "rssi_1m": -59
+  },
+  {
+    "name": "Office",
+    "uuid": "FDA50693A4E24FB1AFCFC6EB07647825",
+    "major": 10,
+    "minor": 2,
+    "rssi_1m": -59
+  }
+]
