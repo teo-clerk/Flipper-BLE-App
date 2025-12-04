@@ -87,7 +87,7 @@ bool beacon_loader_load(const char* path, BeaconItem* beacons, size_t max_count,
                     char clean_hex[33] = {0};
                     int c_idx = 0;
                     for(int i=0; uuid_str[i] != '\0' && c_idx < 32; i++) {
-                        if(isalnum(uuid_str[i])) {
+                        if(isalnum((unsigned char)uuid_str[i])) {
                             clean_hex[c_idx++] = uuid_str[i];
                         }
                     }

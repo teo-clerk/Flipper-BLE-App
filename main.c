@@ -23,6 +23,7 @@ typedef struct {
     BeaconItem beacons[MAX_BEACONS];
     size_t beacon_count;
     int selected_beacon_index;
+    BeaconAppView current_view;
 } BeaconApp;
 
 // Helper to construct advertising data
@@ -77,6 +78,12 @@ static void set_beacon_data(BeaconItem* item) {
     furi_hal_bt_extra_beacon_start();
 }
 
+static void stop_beacon_if_active() {
+    if(furi_hal_bt_extra_beacon_is_active()) {
+        furi_hal_bt_extra_beacon_stop();
+    }
+}
+
 static void submenu_callback(void* context, uint32_t index) {
     BeaconApp* app = context;
     if(index < app->beacon_count) {
@@ -102,23 +109,19 @@ static void submenu_callback(void* context, uint32_t index) {
         widget_add_string_element(app->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, buffer);
 
         view_dispatcher_switch_to_view(app->view_dispatcher, BeaconAppViewWidget);
+        app->current_view = BeaconAppViewWidget;
     }
 }
 
-static uint32_t view_dispatcher_navigation_event_callback(void* context) {
-    UNUSED(context);
-    return BeaconAppViewSubmenu;
-}
-
-static uint32_t view_dispatcher_exit_callback(void* context) {
-    UNUSED(context);
-    return VIEW_NONE;
-}
-
-static void stop_beacon_if_active() {
-    if(furi_hal_bt_extra_beacon_is_active()) {
-        furi_hal_bt_extra_beacon_stop();
+static bool view_dispatcher_navigation_event_callback(void* context) {
+    BeaconApp* app = context;
+    if(app->current_view == BeaconAppViewWidget) {
+        stop_beacon_if_active();
+        view_dispatcher_switch_to_view(app->view_dispatcher, BeaconAppViewSubmenu);
+        app->current_view = BeaconAppViewSubmenu;
+        return true;
     }
+    return false;
 }
 
 int32_t aula_m4_app(void* p) {
@@ -141,7 +144,7 @@ int32_t aula_m4_app(void* p) {
     // GUI Setup
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_enable_queue(app->view_dispatcher);
+    // view_dispatcher_enable_queue(app->view_dispatcher); // Deprecated
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Submenu
@@ -163,6 +166,7 @@ int32_t aula_m4_app(void* p) {
     
     // Start at Submenu
     view_dispatcher_switch_to_view(app->view_dispatcher, BeaconAppViewSubmenu);
+    app->current_view = BeaconAppViewSubmenu;
 
     // Run
     view_dispatcher_run(app->view_dispatcher);
